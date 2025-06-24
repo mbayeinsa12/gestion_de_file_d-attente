@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de File d'Attente Animée</title>
+
+    <link rel="stylesheet" href="https://bootswatch.com/5/morph/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* Animation pour l'apparition en fondu des tickets */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Appliquer l'animation à chaque ligne du tableau */
+        .table tbody tr {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        /* Transition douce pour le survol des lignes */
+        .table-hover > tbody > tr {
+            transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+        }
+
+        .table-hover > tbody > tr:hover {
+            transform: scale(1.02); /* Effet de léger zoom au survol */
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        /* Animation pour les boutons */
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary"> <div class="container-fluid">
+    <a class="navbar-brand" href="/queue"><i class="bi bi-people-fill"></i> QueueManager Pro</a>
+</div>
+</nav>
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">File d'attente actuelle</h1>
+        <div>
+            <form th:action="@{/queue/add}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle-fill"></i> Ajouter un Ticket</button>
+            </form>
+            <form th:action="@{/queue/process}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success" th:disabled="${tickets.isEmpty()}">
+                    <i class="bi bi-check-circle-fill"></i> Traiter le Prochain
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-light mb-3"> <div class="card-body">
+        <div th:if="${tickets.isEmpty()}" class="alert alert-dismissible alert-light text-center">
+            <i class="bi bi-info-circle"></i> La file d'attente est actuellement vide.
+        </div>
+
+        <div th:unless="${tickets.isEmpty()}" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th scope="col">Position</th>
+                    <th scope="col">N° Ticket</th>
+                    <th scope="col">Personnes devant</th>
+                    <th scope="col" class="text-center">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="ticket, stat : ${tickets}">
+                    <td class="fw-bold" th:text="${stat.count}">1</td>
+                    <td th:text="${ticket.displayId}">T-101</td>
+                    <td th:text="${stat.index}">0</td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <form th:action="@{/queue/move-up/{id}(id=${ticket.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-secondary" th:disabled="${stat.first}">
+                                    <i class="bi bi-arrow-up-circle"></i> Monter
+                                </button>
+                            </form>
+                            <form th:action="@{/queue/move-down/{id}(id=${ticket.id})}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-secondary" th:disabled="${stat.last}">
+                                    <i class="bi bi-arrow-down-circle"></i> Descendre
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+
+    <footer class="text-center text-muted mt-5">
+        <p>&copy; 2025 - Mon Application de File d'Attente</p>
+    </footer>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
